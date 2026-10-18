@@ -7,3 +7,12 @@
 [2026-10-18 10:53:17] [WARNING ] TCP port 443 is NOT LISTENING
 [2026-10-18 10:53:17] [WARNING ] TCP port 8000 is NOT LISTENING
 [2026-10-18 10:53:17] [INFO    ] ========== Health Check Completed ==========
+[2026-10-18 11:28:28] [INFO    ] ========== Health Check Started ==========
+[2026-10-18 11:28:29] [OK      ] CPU usage is 0%
+[2026-10-18 11:28:29] [OK      ] Memory usage is 6%
+[2026-10-18 11:28:29] [OK      ] Root disk usage is 1%
+[2026-10-18 11:28:29] [OK      ] TCP port 22 is LISTENING
+[2026-10-18 11:28:29] [WARNING ] TCP port 80 is NOT LISTENING
+[2026-10-18 11:28:29] [WARNING ] TCP port 443 is NOT LISTENING
+[2026-10-18 11:28:29] [WARNING ] TCP port 8000 is NOT LISTENING
+[2026-10-18 11:28:29] [INFO    ] ========== Health Check Completed ==========
