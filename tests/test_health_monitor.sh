@@ -20,3 +20,10 @@ else
 fi
 
 echo "All tests passed!"
+# Test 3: Check Bash syntax
+if bash -n scripts/health_monitor.sh; then
+    echo "PASS: Health monitor script syntax is valid"
+else
+    echo "FAIL: Health monitor script contains syntax errors"
+    exit 1
+fi
