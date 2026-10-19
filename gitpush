@@ -1,4 +1,14 @@
-#!/bin/bash
-git add .
-git commit -m "changed"
+
+#!/usr/bin/env bash
+set -e
+
+git add .gitignore README.md config scripts tests gitpush
+
+if git diff --cached --quiet; then
+    echo "No changes to commit."
+    exit 0
+fi
+
+git status --short
+git commit -m "Update Linux server health monitor"
 git push origin main
