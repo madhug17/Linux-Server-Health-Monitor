@@ -1,16 +1,24 @@
 
-
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+# Project configuration
 PROJECT_DIR="$HOME/projects/server-health-monitor"
 CONFIG_FILE="$PROJECT_DIR/config/monitor.conf"
 LOG_DIR="$PROJECT_DIR/logs"
 LOG_FILE="$LOG_DIR/health_monitor.log"
 
 mkdir -p "$LOG_DIR"
+
+# Load configuration
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "ERROR: Configuration file not found: $CONFIG_FILE" >&2
+    exit 1
+fi
+
 source "$CONFIG_FILE"
 
+# Logging function
 log() {
     local level="$1"
     shift
@@ -20,10 +28,45 @@ log() {
         "$level" "$*" | tee -a "$LOG_FILE"
 }
 
-# Load reusable threshold logic
-source "$PROJECT_DIR/scripts/thresholds.sh"
+# Email alert function
+send_alert() {
+    local subject="$1"
+    local body="$2"
+
+    if [[ "${EMAIL_ALERTS:-false}" != "true" ]]; then
+        return 0
+    fi
+
+    if [[ -z "${ALERT_EMAIL:-}" ]]; then
+        log "ERROR" "ALERT_EMAIL is not configured"
+        return 1
+    fi
+
+    if ! command -v mail >/dev/null 2>&1; then
+        log "ERROR" "mail command is not installed"
+        return 1
+    fi
+
+    if printf '%s\n' "$body" | mail -s "$subject" "$ALERT_EMAIL"; then
+        log "INFO" "Alert email submitted to $ALERT_EMAIL"
+    else
+        log "ERROR" "Failed to submit alert email"
+        return 1
+    fi
+}
+
+# Load threshold checking function
+THRESHOLD_FILE="$PROJECT_DIR/scripts/thresholds.sh"
+
+if [[ ! -f "$THRESHOLD_FILE" ]]; then
+    log "ERROR" "Threshold script not found: $THRESHOLD_FILE"
+    exit 1
+fi
+
+source "$THRESHOLD_FILE"
 
 log "INFO" "========== Health Check Started =========="
+log "INFO" "Host: $(hostname)"
 
 # CPU usage: compare two samples one second apart
 read -r cpu user nice system idle iowait irq softirq steal rest \
@@ -70,8 +113,8 @@ else
     log "WARNING" "Unable to calculate root disk usage"
 fi
 
-# TCP port checks
-for port in $MONITOR_PORTS; do
+# TCP port monitoring
+for port in ${MONITOR_PORTS:-}; do
     if ss -H -lnt "sport = :$port" | grep -q .; then
         log "OK" "TCP port $port is LISTENING"
     else

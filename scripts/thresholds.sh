@@ -1,3 +1,4 @@
+
 #!/usr/bin/env bash
 
 check_threshold() {
@@ -8,8 +9,19 @@ check_threshold() {
 
     if (( value >= critical )); then
         log "CRITICAL" "$name usage is ${value}% (threshold: ${critical}%)"
+
+        if declare -F send_alert >/dev/null; then
+            send_alert \
+                "CRITICAL: $name Alert on $(hostname)" \
+                "Alert: $name usage reached ${value}%.
+Threshold: ${critical}%
+Host: $(hostname)
+Time: $(date '+%Y-%m-%d %H:%M:%S')"
+        fi
+
     elif (( value >= warning )); then
         log "WARNING" "$name usage is ${value}% (threshold: ${warning}%)"
+
     else
         log "OK" "$name usage is ${value}%"
     fi
